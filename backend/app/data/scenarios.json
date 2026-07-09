@@ -1,0 +1,10 @@
+[
+  {
+    "id": "tv_delivery",
+    "title": "The Large TV Problem",
+    "scenario": "A team needs to move a very large TV to a room on the 8th floor. The TV is inside a large box. The boxed TV will not fit through the elevator door, the garage entrance, or the room doorway. Two experienced workers suggest using a crane or carrying it up eight flights of stairs.",
+    "hidden_assumption": "The TV must stay inside the box.",
+    "better_frame": "How do we get the TV safely into the room?",
+    "simple_solution": "Remove the TV from the box and carry the unboxed TV through the elevator and doorway."
+  }
+]
