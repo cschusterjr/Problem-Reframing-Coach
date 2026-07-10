@@ -2,9 +2,111 @@
   {
     "id": "tv_delivery",
     "title": "The Large TV Problem",
+    "category": "Everyday Problem Solving",
+    "difficulty": "Beginner",
+    "estimated_time": "3 minutes",
+    "cognitive_skill": "Questioning Assumptions",
+    "why_it_matters": "Many people struggle with problems because they accept hidden constraints without testing whether those constraints are actually required.",
     "scenario": "A team needs to move a very large TV to a room on the 8th floor. The TV is inside a large box. The boxed TV will not fit through the elevator door, the garage entrance, or the room doorway. Two experienced workers suggest using a crane or carrying it up eight flights of stairs.",
+    "original_frame": "How do we move a large boxed TV to the 8th floor?",
     "hidden_assumption": "The TV must stay inside the box.",
     "better_frame": "How do we get the TV safely into the room?",
-    "simple_solution": "Remove the TV from the box and carry the unboxed TV through the elevator and doorway."
+    "simple_solution": "Remove the TV from the box and carry the unboxed TV through the elevator and doorway.",
+    "reflection_prompt": "Think of a recent problem where you may have accepted a constraint without questioning it. What was the assumption?",
+    "real_world_applications": [
+      "Project planning",
+      "Classroom problem solving",
+      "Product design",
+      "Operations and logistics"
+    ],
+    "key_takeaway": "Before solving a difficult problem, ask whether you are treating something as fixed that could actually be changed."
+  },
+  {
+    "id": "truck_bridge",
+    "title": "The Truck Under the Bridge",
+    "category": "Everyday Problem Solving",
+    "difficulty": "Beginner",
+    "estimated_time": "3 minutes",
+    "cognitive_skill": "Changing Constraints",
+    "why_it_matters": "Some problems seem impossible because people assume the physical constraints cannot change.",
+    "scenario": "A delivery truck is stuck under a low bridge. It cannot move forward or backward without damaging the truck or the bridge. Engineers and emergency responders are debating how to lift the bridge, dismantle part of the truck, or use heavy equipment to pull it out.",
+    "original_frame": "How do we remove a truck wedged under a bridge?",
+    "hidden_assumption": "The truck's height is fixed.",
+    "better_frame": "How can we temporarily reduce the truck's height?",
+    "simple_solution": "Let air out of the tires so the truck becomes low enough to move out safely.",
+    "reflection_prompt": "Where have you treated a constraint as permanent when it may have been adjustable?",
+    "real_world_applications": [
+      "Engineering",
+      "Operations",
+      "Facilities management",
+      "Emergency response"
+    ],
+    "key_takeaway": "When a constraint blocks progress, ask whether the constraint can be temporarily changed."
+  },
+  {
+    "id": "meeting_overload",
+    "title": "The Overloaded Calendar",
+    "category": "Workplace Thinking",
+    "difficulty": "Intermediate",
+    "estimated_time": "4 minutes",
+    "cognitive_skill": "Remove Before Add",
+    "why_it_matters": "People often solve capacity problems by adding more resources before removing unnecessary work.",
+    "scenario": "A project team says they do not have enough time to complete their work. Their calendars are full of recurring meetings. The first proposed solution is to hire another team member or extend the project deadline.",
+    "original_frame": "How do we add more capacity to the team?",
+    "hidden_assumption": "All existing meetings are necessary.",
+    "better_frame": "How can we create more focused work time with the team we already have?",
+    "simple_solution": "Cancel, shorten, or consolidate low-value recurring meetings before adding headcount or extending the timeline.",
+    "reflection_prompt": "What is one situation where removing work might be better than adding more resources?",
+    "real_world_applications": [
+      "Team management",
+      "Project planning",
+      "Product operations",
+      "Leadership"
+    ],
+    "key_takeaway": "Before adding resources, ask what can be removed, simplified, or reduced."
+  },
+  {
+    "id": "classroom_behavior",
+    "title": "The Distracted Classroom",
+    "category": "Education",
+    "difficulty": "Intermediate",
+    "estimated_time": "4 minutes",
+    "cognitive_skill": "Reframing Behavior Problems",
+    "why_it_matters": "Behavior problems are often treated as motivation problems when the real issue may be task design, environment, or clarity.",
+    "scenario": "A teacher notices that students are distracted during independent work time. The first proposed solution is to create stricter rules, assign more consequences, or remove privileges.",
+    "original_frame": "How do we make students stop getting distracted?",
+    "hidden_assumption": "The problem is mainly student motivation or discipline.",
+    "better_frame": "What conditions are making focused work difficult?",
+    "simple_solution": "Adjust the task structure, reduce ambiguity, provide clearer checkpoints, or change the environment before escalating consequences.",
+    "reflection_prompt": "Think of a learning challenge. What environmental or design factor might be influencing the behavior?",
+    "real_world_applications": [
+      "Teaching",
+      "Classroom management",
+      "Instructional design",
+      "Student support"
+    ],
+    "key_takeaway": "Before correcting behavior, ask what conditions may be producing it."
+  },
+  {
+    "id": "feature_request",
+    "title": "The Feature Request",
+    "category": "Product Thinking",
+    "difficulty": "Intermediate",
+    "estimated_time": "4 minutes",
+    "cognitive_skill": "Problem Before Solution",
+    "why_it_matters": "Teams often build requested solutions before understanding the underlying user need.",
+    "scenario": "A customer requests a new dashboard feature. The team immediately begins discussing requirements, engineering estimates, and timelines. The feature would take several months to build.",
+    "original_frame": "How do we build the requested dashboard feature?",
+    "hidden_assumption": "The requested feature is the best solution to the customer's need.",
+    "better_frame": "What problem is the customer trying to solve with this request?",
+    "simple_solution": "Interview the customer to identify the underlying need, then test whether an existing report, workflow change, or smaller enhancement solves the problem.",
+    "reflection_prompt": "When have you accepted a requested solution before understanding the real problem?",
+    "real_world_applications": [
+      "Product management",
+      "Customer discovery",
+      "Software development",
+      "UX research"
+    ],
+    "key_takeaway": "Before building the requested solution, understand the problem behind the request."
   }
 ]

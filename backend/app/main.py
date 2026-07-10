@@ -1,5 +1,11 @@
 from fastapi import FastAPI, HTTPException
-from app.models import InitialResponse, CoachingResponse, RevisedResponse, FeedbackResponse
+
+from app.models import (
+    InitialResponse,
+    CoachingResponse,
+    RevisedResponse,
+    FeedbackResponse
+)
 from app.scenarios import load_scenarios, get_scenario_by_id
 from app.coach import generate_coaching_questions, generate_feedback
 
@@ -33,7 +39,10 @@ def coach_response(response: InitialResponse):
     if not scenario:
         raise HTTPException(status_code=404, detail="Scenario not found")
 
-    coaching_questions = generate_coaching_questions(response.user_response)
+    coaching_questions = generate_coaching_questions(
+        scenario,
+        response.user_response
+    )
 
     return CoachingResponse(
         scenario_id=response.scenario_id,

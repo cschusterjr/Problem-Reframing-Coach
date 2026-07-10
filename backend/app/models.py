@@ -26,3 +26,6 @@ class FeedbackResponse(BaseModel):
     simple_solution: str
     feedback: str
     score: int
+    key_takeaway: str
+    reflection_prompt: str
+    real_world_applications: list[str]
