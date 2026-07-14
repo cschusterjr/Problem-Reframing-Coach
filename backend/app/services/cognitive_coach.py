@@ -1,34 +1,32 @@
+from app.services.mock_provider import MockAIProvider
+
+
 class CognitiveCoach:
     """
     Core coaching engine.
 
-    This class contains the instructional logic that guides learners
-    through identifying assumptions, reframing problems, and reflecting
-    on their thinking.
-
-    Later, individual methods will call GPT instead of returning
-    hardcoded responses.
+    The coach owns the instructional logic.
+    The AI provider owns how coaching text is generated.
     """
 
+    def __init__(self, ai_provider=None):
+        self.ai_provider = ai_provider or MockAIProvider()
+
     def analyze_response(self, user_response: str):
-        """
-        Placeholder for future AI analysis.
-        """
         return {
             "response_length": len(user_response),
-            "contains_solution": True
+            "contains_solution": bool(user_response.strip())
         }
 
-    def generate_questions(self, scenario):
-        return [
-            "What assumptions are you making about the object, the space, or the process?",
-            "What part of the situation are you treating as fixed that might actually be changeable?",
-            "What is the real goal you are trying to accomplish?",
-            "What could be removed, reduced, or changed before choosing a complex solution?"
-        ]
+    def generate_questions(self, scenario: dict, user_response: str):
+        self.analyze_response(user_response)
+
+        return self.ai_provider.generate_coaching_questions(
+            scenario=scenario,
+            user_response=user_response
+        )
 
     def score_response(self, revised_response: str):
-
         revised = revised_response.lower()
 
         keywords = [
@@ -39,7 +37,9 @@ class CognitiveCoach:
             "tire",
             "meeting",
             "customer",
-            "problem"
+            "problem",
+            "simplify",
+            "constraint"
         ]
 
         for keyword in keywords:
@@ -49,7 +49,6 @@ class CognitiveCoach:
         return 7
 
     def generate_feedback(self, scenario, initial_response, revised_response):
-
         score = self.score_response(revised_response)
 
         return {
