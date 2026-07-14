@@ -31,6 +31,10 @@ def render_scenario_card(scenario):
         unsafe_allow_html=True
     )
 
+    st.markdown("#### Thinking Skill")
+    st.write(f"**{scenario['cognitive_skill']}**")
+    st.write(scenario["why_it_matters"])
+
     st.info(
         "Before answering, pause and ask: What is the actual goal? Which constraints are real, and which might be assumptions?"
     )
