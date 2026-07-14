@@ -2,6 +2,8 @@ import streamlit as st
 
 
 def render_initial_response_form(scenario, api_base_url, requests):
+    st.markdown("#### Your First Response")
+
     initial_response = st.text_area(
         "What would you do first?",
         height=150,
@@ -31,7 +33,17 @@ def render_coaching_questions():
     st.markdown("### Step 2 of 3: Pause and Reframe")
     st.progress(0.66)
 
-    st.write("Before revising your answer, consider these coaching questions:")
+    st.markdown(
+        """
+        <div class="coach-card">
+            <h3>Coach's Guidance</h3>
+            <p class="muted">
+                Do not revise immediately. First, inspect your assumptions.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-    for question in st.session_state["coaching_questions"]:
-        st.write(f"- {question}")
+    for index, question in enumerate(st.session_state["coaching_questions"], start=1):
+        st.markdown(f"**{index}. {question}**")
