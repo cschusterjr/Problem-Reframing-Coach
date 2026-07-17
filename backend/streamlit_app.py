@@ -29,7 +29,6 @@ scenario = st.session_state["selected_scenario"]
 
 if st.session_state["step"] == "welcome":
     render_welcome()
-    st.markdown("### Choose a challenge")
     selected_scenario = render_scenario_selector(scenarios)
     st.session_state["selected_scenario"] = selected_scenario
 

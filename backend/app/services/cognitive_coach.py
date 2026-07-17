@@ -1,4 +1,4 @@
-from app.services.mock_provider import MockAIProvider
+from app.services.provider_factory import create_ai_provider
 
 
 class CognitiveCoach:
@@ -10,7 +10,7 @@ class CognitiveCoach:
     """
 
     def __init__(self, ai_provider=None):
-        self.ai_provider = ai_provider or MockAIProvider()
+        self.ai_provider = ai_provider or create_ai_provider()
 
     def analyze_response(self, user_response: str):
         return {
@@ -48,7 +48,12 @@ class CognitiveCoach:
 
         return 7
 
-    def generate_feedback(self, scenario, initial_response, revised_response):
+    def generate_feedback(
+        self,
+        scenario: dict,
+        initial_response: str,
+        revised_response: str
+    ):
         score = self.score_response(revised_response)
 
         return {
