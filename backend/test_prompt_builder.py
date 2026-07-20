@@ -9,9 +9,14 @@ if scenario is None:
 
 builder = PromptBuilder()
 
-prompt = builder.build_coaching_prompt(
+request = builder.build_request(
     scenario=scenario,
-    user_response="I would use a crane to move the television."
+    user_response="I would use a crane to move the television.",
 )
 
-print(prompt)
+print("=== INSTRUCTIONS ===")
+print(request["instructions"])
+
+print()
+print("=== INPUT ===")
+print(request["input"])

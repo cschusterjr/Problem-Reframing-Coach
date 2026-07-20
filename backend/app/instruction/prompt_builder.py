@@ -5,16 +5,11 @@ from app.instruction.scenario_strategy import get_instructional_strategy
 
 class PromptBuilder:
     """
-    Builds the full coaching prompt from:
-
-    - the base system prompt
-    - the scenario
-    - the learner's response
-    - the selected instructional strategy
+    Builds structured instructions and learner context for AI coaching.
     """
 
     def __init__(self):
-        self.system_prompt = self._load_system_prompt()
+        self.base_system_prompt = self._load_system_prompt()
 
     def _load_system_prompt(self) -> str:
         prompt_path = (
@@ -30,11 +25,7 @@ class PromptBuilder:
 
         return prompt_path.read_text(encoding="utf-8")
 
-    def build_coaching_prompt(
-        self,
-        scenario: dict,
-        user_response: str
-    ) -> str:
+    def build_instructions(self, scenario: dict) -> str:
         strategy = get_instructional_strategy(scenario)
 
         principles = "\n".join(
@@ -43,7 +34,7 @@ class PromptBuilder:
         )
 
         return f"""
-{self.system_prompt}
+{self.base_system_prompt}
 
 ## Current Instructional Strategy
 
@@ -55,7 +46,14 @@ Coaching goal:
 
 Coaching principles:
 {principles}
+""".strip()
 
+    def build_input(
+        self,
+        scenario: dict,
+        user_response: str,
+    ) -> str:
+        return f"""
 ## Scenario Context
 
 Scenario title:
@@ -82,3 +80,16 @@ Do not reveal:
 - The simple solution
 - The final answer
 """.strip()
+
+    def build_request(
+        self,
+        scenario: dict,
+        user_response: str,
+    ) -> dict:
+        return {
+            "instructions": self.build_instructions(scenario),
+            "input": self.build_input(
+                scenario=scenario,
+                user_response=user_response,
+            ),
+        }

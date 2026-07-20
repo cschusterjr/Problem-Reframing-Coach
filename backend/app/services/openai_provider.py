@@ -8,9 +8,7 @@ from app.services.ai_provider import AIProvider
 
 class OpenAIProvider(AIProvider):
     """
-    Generates personalized coaching questions with the OpenAI API.
-
-    The provider is only used when AI_PROVIDER=openai.
+    Generates personalized coaching questions using the OpenAI API.
     """
 
     def __init__(self):
@@ -29,7 +27,7 @@ class OpenAIProvider(AIProvider):
                 "Add it to backend/.env or use AI_PROVIDER=mock."
             )
 
-        prompt = self.prompt_builder.build_coaching_prompt(
+        request = self.prompt_builder.build_request(
             scenario=scenario,
             user_response=user_response,
         )
@@ -38,14 +36,15 @@ class OpenAIProvider(AIProvider):
 
         response = client.responses.create(
             model=self.model,
-            input=prompt,
+            instructions=request["instructions"],
+            input=request["input"],
         )
 
         questions = self._parse_questions(response.output_text)
 
         if len(questions) != 4:
             raise ValueError(
-                "OpenAIProvider expected exactly four coaching questions, "
+                "Expected exactly four coaching questions, "
                 f"but received {len(questions)}."
             )
 
