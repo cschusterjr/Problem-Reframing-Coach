@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from app.instruction.diagnoser import CognitiveDiagnoser
 from app.instruction.scenario_strategy import get_instructional_strategy
 
 
@@ -10,6 +11,7 @@ class PromptBuilder:
 
     def __init__(self):
         self.base_system_prompt = self._load_system_prompt()
+        self.diagnoser = CognitiveDiagnoser()
 
     def _load_system_prompt(self) -> str:
         prompt_path = (
@@ -53,6 +55,11 @@ Coaching principles:
         scenario: dict,
         user_response: str,
     ) -> str:
+        diagnosis = self.diagnoser.diagnose(
+            scenario=scenario,
+            learner_response=user_response,
+        )
+
         return f"""
 ## Scenario Context
 
@@ -69,12 +76,31 @@ Target cognitive skill:
 
 {user_response}
 
+## Internal Cognitive Diagnosis
+
+Reasoning pattern:
+{diagnosis.reasoning_pattern}
+
+Likely assumption:
+{diagnosis.likely_assumption}
+
+Recommended instructional move:
+{diagnosis.instructional_move}
+
+Diagnosis confidence:
+{diagnosis.confidence:.2f}
+
+Use this diagnosis to target the coaching questions.
+
+Do not reveal the diagnosis directly to the learner.
+
 ## Task
 
 Generate exactly four concise coaching questions that are specific to the learner's response.
 
 Do not reveal:
 
+- The internal cognitive diagnosis
 - The hidden assumption
 - The better framing
 - The simple solution
