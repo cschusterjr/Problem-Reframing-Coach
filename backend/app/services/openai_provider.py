@@ -1,5 +1,8 @@
 import os
+import re
+from pathlib import Path
 
+from dotenv import load_dotenv
 from openai import OpenAI
 
 from app.instruction.prompt_builder import PromptBuilder
@@ -7,69 +10,81 @@ from app.services.ai_provider import AIProvider
 
 
 class OpenAIProvider(AIProvider):
-    """
-    Generates personalized coaching questions using the OpenAI API.
-    """
+    """Generates cognitive coaching questions using the OpenAI API."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        load_dotenv()
+
+        api_key = os.getenv("OPENAI_API_KEY")
+
+        if not api_key:
+            raise ValueError(
+                "OPENAI_API_KEY is missing. "
+                "Add it to the backend/.env file."
+            )
+
         self.model = os.getenv("OPENAI_MODEL", "gpt-5-mini")
-        self.api_key = os.getenv("OPENAI_API_KEY", "")
-        self.prompt_builder = PromptBuilder()
+        self.client = OpenAI(api_key=api_key)
+
+        prompt_path = (
+            Path(__file__).resolve().parents[2]
+            / "prompts"
+            / "cognitive_coach.md"
+        )
+
+        if not prompt_path.exists():
+            raise FileNotFoundError(
+                f"System prompt file was not found: {prompt_path}"
+            )
+
+        system_prompt = prompt_path.read_text(encoding="utf-8")
+        self.prompt_builder = PromptBuilder(system_prompt)
 
     def generate_coaching_questions(
         self,
         scenario: dict,
-        user_response: str,
+        learner_response: str,
     ) -> list[str]:
-        if not self.api_key:
-            raise ValueError(
-                "OPENAI_API_KEY is missing. "
-                "Add it to backend/.env or use AI_PROVIDER=mock."
-            )
-
-        request = self.prompt_builder.build_request(
+        prompt = self.prompt_builder.build(
             scenario=scenario,
-            user_response=user_response,
+            learner_response=learner_response,
         )
 
-        client = OpenAI(api_key=self.api_key)
-
-        response = client.responses.create(
+        response = self.client.responses.create(
             model=self.model,
-            instructions=request["instructions"],
-            input=request["input"],
+            instructions=prompt["instructions"],
+            input=prompt["input"],
         )
 
         questions = self._parse_questions(response.output_text)
 
-        if len(questions) != 4:
+        if len(questions) < 4:
             raise ValueError(
-                "Expected exactly four coaching questions, "
-                f"but received {len(questions)}."
+                "The OpenAI response did not contain four coaching questions."
             )
 
-        return questions
+        return questions[:4]
 
-    def _parse_questions(self, output_text: str) -> list[str]:
+    @staticmethod
+    def _parse_questions(response_text: str) -> list[str]:
+        if not response_text or not response_text.strip():
+            return []
+
         questions = []
 
-        for line in output_text.splitlines():
+        for line in response_text.strip().splitlines():
             cleaned_line = line.strip()
 
             if not cleaned_line:
                 continue
 
-            cleaned_line = cleaned_line.lstrip("-• ")
-            cleaned_line = self._remove_numbering(cleaned_line)
+            cleaned_line = re.sub(
+                r"^(?:\d+[.)]|[-*])\s*",
+                "",
+                cleaned_line,
+            ).strip()
 
             if cleaned_line:
                 questions.append(cleaned_line)
 
         return questions
-
-    def _remove_numbering(self, text: str) -> str:
-        for prefix in ("1. ", "2. ", "3. ", "4. "):
-            if text.startswith(prefix):
-                return text[len(prefix):].strip()
-
-        return text

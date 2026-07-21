@@ -1,121 +1,62 @@
-from pathlib import Path
-
-from app.instruction.diagnoser import CognitiveDiagnoser
-from app.instruction.scenario_strategy import get_instructional_strategy
-
-
 class PromptBuilder:
-    """
-    Builds structured instructions and learner context for AI coaching.
-    """
+    """Builds structured instructions and learner input for the AI coach."""
 
-    def __init__(self):
-        self.base_system_prompt = self._load_system_prompt()
-        self.diagnoser = CognitiveDiagnoser()
+    def __init__(self, system_prompt: str):
+        self.system_prompt = system_prompt
 
-    def _load_system_prompt(self) -> str:
-        prompt_path = (
-            Path(__file__).resolve().parents[2]
-            / "prompts"
-            / "cognitive_coach.md"
-        )
-
-        if not prompt_path.exists():
-            raise FileNotFoundError(
-                f"Cognitive coach prompt not found at: {prompt_path}"
-            )
-
-        return prompt_path.read_text(encoding="utf-8")
-
-    def build_instructions(self, scenario: dict) -> str:
-        strategy = get_instructional_strategy(scenario)
-
-        principles = "\n".join(
-            f"- {principle}"
-            for principle in strategy.coaching_principles
-        )
-
-        return f"""
-{self.base_system_prompt}
-
-## Current Instructional Strategy
-
-Strategy name:
-{strategy.name}
-
-Coaching goal:
-{strategy.coaching_goal}
-
-Coaching principles:
-{principles}
-""".strip()
-
-    def build_input(
+    def build(
         self,
         scenario: dict,
-        user_response: str,
-    ) -> str:
-        diagnosis = self.diagnoser.diagnose(
-            scenario=scenario,
-            learner_response=user_response,
+        learner_response: str,
+    ) -> dict:
+        scenario_title = scenario.get("title", "Untitled scenario")
+
+        scenario_description = (
+            scenario.get("description")
+            or scenario.get("scenario")
+            or scenario.get("prompt")
+            or scenario.get("problem")
+            or "No scenario description was provided."
         )
 
-        return f"""
-## Scenario Context
+        cognitive_skill = scenario.get(
+            "cognitive_skill",
+            "Problem reframing",
+        )
 
-Scenario title:
-{scenario["title"]}
+        instructions = f"""
+{self.system_prompt}
 
-Scenario:
-{scenario["scenario"]}
+Generate exactly four coaching questions using this sequence:
+
+1. Inspect assumptions
+2. Challenge fixed constraints
+3. Simplify before adding
+4. Reframe the goal
+
+Do not answer the scenario.
+Do not reveal the solution.
+Do not provide advice beyond the four coaching questions.
+""".strip()
+
+        learner_input = f"""
+SCENARIO
+
+Title:
+{scenario_title}
+
+Description:
+{scenario_description}
 
 Target cognitive skill:
-{scenario["cognitive_skill"]}
+{cognitive_skill}
 
-## Learner Response
+LEARNER'S INITIAL RESPONSE
 
-{user_response}
-
-## Internal Cognitive Diagnosis
-
-Reasoning pattern:
-{diagnosis.reasoning_pattern}
-
-Likely assumption:
-{diagnosis.likely_assumption}
-
-Recommended instructional move:
-{diagnosis.instructional_move}
-
-Diagnosis confidence:
-{diagnosis.confidence:.2f}
-
-Use this diagnosis to target the coaching questions.
-
-Do not reveal the diagnosis directly to the learner.
-
-## Task
-
-Generate exactly four concise coaching questions that are specific to the learner's response.
-
-Do not reveal:
-
-- The internal cognitive diagnosis
-- The hidden assumption
-- The better framing
-- The simple solution
-- The final answer
+{learner_response}
 """.strip()
 
-    def build_request(
-        self,
-        scenario: dict,
-        user_response: str,
-    ) -> dict:
         return {
-            "instructions": self.build_instructions(scenario),
-            "input": self.build_input(
-                scenario=scenario,
-                user_response=user_response,
-            ),
+            "instructions": instructions,
+            "input": learner_input,
         }

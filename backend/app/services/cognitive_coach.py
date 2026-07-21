@@ -12,21 +12,25 @@ class CognitiveCoach:
     def __init__(self, ai_provider=None):
         self.ai_provider = ai_provider or create_ai_provider()
 
-    def analyze_response(self, user_response: str):
+    def analyze_response(self, user_response: str) -> dict:
         return {
             "response_length": len(user_response),
-            "contains_solution": bool(user_response.strip())
+            "contains_solution": bool(user_response.strip()),
         }
 
-    def generate_questions(self, scenario: dict, user_response: str):
+    def generate_questions(
+        self,
+        scenario: dict,
+        user_response: str,
+    ) -> list[str]:
         self.analyze_response(user_response)
 
         return self.ai_provider.generate_coaching_questions(
             scenario=scenario,
-            user_response=user_response
+            learner_response=user_response,
         )
 
-    def score_response(self, revised_response: str):
+    def score_response(self, revised_response: str) -> int:
         revised = revised_response.lower()
 
         keywords = [
@@ -39,7 +43,7 @@ class CognitiveCoach:
             "customer",
             "problem",
             "simplify",
-            "constraint"
+            "constraint",
         ]
 
         for keyword in keywords:
@@ -52,8 +56,8 @@ class CognitiveCoach:
         self,
         scenario: dict,
         initial_response: str,
-        revised_response: str
-    ):
+        revised_response: str,
+    ) -> dict:
         score = self.score_response(revised_response)
 
         return {
@@ -70,5 +74,5 @@ class CognitiveCoach:
             "score": score,
             "key_takeaway": scenario["key_takeaway"],
             "reflection_prompt": scenario["reflection_prompt"],
-            "real_world_applications": scenario["real_world_applications"]
+            "real_world_applications": scenario["real_world_applications"],
         }
