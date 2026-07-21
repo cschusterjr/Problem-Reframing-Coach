@@ -2,7 +2,7 @@
 
 An AI-powered cognitive coaching platform that helps learners improve **how they think**, not just **what they know**.
 
-Instead of providing answers, the application guides learners through identifying hidden assumptions, reframing problems, and developing transferable thinking skills through structured coaching.
+Rather than providing answers, the application guides learners through identifying hidden assumptions, reframing problems, and developing transferable thinking skills through structured AI coaching.
 
 ---
 
@@ -14,37 +14,37 @@ This project explores a different question:
 
 > **What if AI could help people become better thinkers instead of simply providing answers?**
 
-The long-term vision is an AI-powered coach that helps students, educators, and workforce learners develop cognitive flexibility through guided reflection and practice.
+Instead of replacing human reasoning, the goal is to strengthen it.
 
 ---
 
 # The Problem
 
-People often solve the problem they believe they have instead of the problem they actually have.
+People frequently solve the problem they believe they have instead of the problem they actually have.
 
-Real-world examples include:
+Examples include:
 
-- Removing a television from its box so it fits into an elevator instead of using a crane.
+- Removing a television from its box so it fits in an elevator instead of using a crane.
 - Deflating a truck's tires so it can pass under a bridge instead of dismantling the truck or lifting the bridge.
 
-These examples illustrate **functional fixedness**—the tendency to accept hidden assumptions without questioning them.
+These examples demonstrate **functional fixedness**—the tendency to accept hidden assumptions without questioning them.
 
-This project teaches learners how to recognize and overcome those thinking patterns.
+This application teaches learners to recognize those thinking patterns before committing to a solution.
 
 ---
 
 # Learning Objectives
 
-The platform helps learners practice:
+Learners practice:
 
 - Questioning assumptions
 - Problem reframing
 - Challenging constraints
-- Simplification before complexity
+- Simplifying before adding complexity
 - First-principles thinking
 - Reflection and transfer of learning
 
-Each scenario focuses on developing one specific cognitive skill.
+Each scenario is designed around a specific cognitive skill.
 
 ---
 
@@ -55,6 +55,7 @@ Each scenario focuses on developing one specific cognitive skill.
 - Welcome experience
 - Scenario selection
 - Guided coaching workflow
+- AI-generated coaching
 - Reflection report
 - Multi-step learning process
 
@@ -76,36 +77,164 @@ Each scenario includes:
 - Real-World Applications
 - Key Takeaway
 
-## Cognitive Coaching
+---
 
-Learners:
+# AI Coaching Workflow
 
-1. Read a scenario.
-2. Submit an initial response.
-3. Receive coaching questions.
-4. Revise their thinking.
-5. Review a Cognitive Flexibility Report.
+Every learner follows the same coaching process.
+
+```text
+Understand the Problem
+
+↓
+
+Submit Initial Response
+
+↓
+
+Inspect Assumptions
+
+↓
+
+Challenge Constraints
+
+↓
+
+Simplify Before Adding
+
+↓
+
+Reframe the Goal
+
+↓
+
+Revise Response
+
+↓
+
+Reflection
+```
+
+This instructional sequence teaches a repeatable thinking framework rather than simply solving a single problem.
 
 ---
 
 # Current Architecture
 
+```mermaid
+flowchart TD
+
+A[Streamlit Learner Interface] --> B[FastAPI Backend]
+
+B --> C[CognitiveCoach]
+
+C --> D[CognitiveDiagnoser]
+
+C --> E[PromptBuilder]
+
+D --> E
+
+E --> F[Instructional Strategy]
+
+F --> G[Provider Factory]
+
+G --> H[MockAIProvider]
+
+G --> I[OpenAIProvider]
+
+I --> J[OpenAI Responses API]
+
+J --> K[Personalized Coaching]
+
+H --> K
+
+K --> A
 ```
-                 Streamlit UI
-                       │
-                       ▼
-                 FastAPI Backend
-                       │
-                       ▼
-               CognitiveCoach
-                       │
-                       ▼
-                 AI Provider
-                       │
-          ┌────────────┴────────────┐
-          │                         │
-   MockAIProvider          OpenAIProvider (planned)
+
+---
+
+# AI Coaching Pipeline
+
+```text
+Learner Response
+
+↓
+
+Cognitive Diagnosis
+
+↓
+
+Instructional Strategy
+
+↓
+
+Prompt Builder
+
+↓
+
+AI Provider
+
+↓
+
+Personalized Coaching
+
+↓
+
+Learner Revision
+
+↓
+
+Reflection
 ```
+
+---
+
+# Architecture Responsibilities
+
+## Streamlit
+
+Provides the learner experience, scenario selection, session management, coaching workflow, and reflection interface.
+
+## FastAPI
+
+Exposes REST APIs and coordinates communication between the user interface and coaching services.
+
+## CognitiveCoach
+
+Coordinates the instructional workflow and delegates coaching generation to the configured AI provider.
+
+## CognitiveDiagnoser
+
+Performs an internal diagnosis of the learner's reasoning patterns before coaching begins.
+
+## Instructional Strategy
+
+Determines the pedagogical objective for each cognitive skill.
+
+Examples include:
+
+- Question Assumptions
+- Challenge Constraints
+- Remove Before Add
+
+## PromptBuilder
+
+Constructs structured prompts by combining:
+
+- System instructions
+- Instructional strategy
+- Scenario context
+- Cognitive diagnosis
+- Learner response
+
+## AI Provider
+
+Supports multiple AI providers through a common interface.
+
+Current providers:
+
+- MockAIProvider
+- OpenAIProvider
 
 ---
 
@@ -121,6 +250,12 @@ Learners:
 
 - Streamlit
 
+## AI
+
+- OpenAI Responses API
+- Prompt Engineering
+- Provider Abstraction Layer
+
 ## Data
 
 - JSON Scenario Repository
@@ -128,81 +263,78 @@ Learners:
 ## Architecture
 
 - REST APIs
-- Service Layer Architecture
-- Modular UI Components
-- AI Provider Abstraction
+- Service Layer
+- Provider Factory
+- Instructional Strategy Pattern
+- Prompt Builder Pattern
 
 ---
 
 # Project Structure
 
-```
+```text
 backend/
-│
+
 ├── app/
+
 │   ├── data/
-│   ├── services/
-│   │   ├── ai_provider.py
-│   │   ├── cognitive_coach.py
-│   │   ├── mock_provider.py
-│   │   └── openai_provider.py
+
+│   ├── instruction/
+
+│   │   ├── diagnosis.py
+
+│   │   ├── diagnoser.py
+
+│   │   ├── prompt_builder.py
+
+│   │   ├── scenario_strategy.py
+
+│   │   └── strategy.py
+
 │   │
+
+│   ├── services/
+
+│   │   ├── ai_provider.py
+
+│   │   ├── cognitive_coach.py
+
+│   │   ├── mock_provider.py
+
+│   │   ├── openai_provider.py
+
+│   │   └── provider_factory.py
+
+│   │
+
 │   ├── coach.py
+
 │   ├── main.py
+
 │   ├── models.py
+
 │   └── scenarios.py
+
 │
+
+├── prompts/
+
+│   └── cognitive_coach.md
+
+│
+
 ├── ui/
-│   ├── coaching.py
-│   ├── feedback.py
-│   ├── scenario.py
-│   ├── styles.py
-│   └── welcome.py
-│
-└── streamlit_app.py
-```
 
----
+├── streamlit_app.py
 
-# Example Learning Flow
-
-```
-Welcome
-
-↓
-
-Choose Scenario
-
-↓
-
-Understand the Problem
-
-↓
-
-Initial Response
-
-↓
-
-Cognitive Coaching
-
-↓
-
-Revised Response
-
-↓
-
-Cognitive Flexibility Report
-
-↓
-
-Reflection
+└── requirements.txt
 ```
 
 ---
 
 # Educational Foundations
 
-This project draws inspiration from research in:
+The instructional model draws inspiration from research in:
 
 - Cognitive Flexibility
 - Functional Fixedness
@@ -217,39 +349,43 @@ This project draws inspiration from research in:
 
 🚧 Active Development
 
-Current milestone:
+Current Version:
 
-**Phase 5 — AI Cognitive Coach**
+**0.6.0-beta**
 
-Next milestone:
+Current Phase:
 
-Integrate OpenAI to generate personalized coaching while preserving the instructional philosophy of guided thinking rather than answer generation.
+**Phase 6 – AI Cognitive Coach**
+
+Current Module:
+
+**Module 6.4 – Guided Coaching Experience**
 
 ---
 
 # Future Roadmap
 
-## AI Coaching
+## Adaptive Coaching
 
-Replace static coaching with personalized AI coaching.
+Diagnose learner thinking patterns before generating coaching.
 
 ## Intelligent Assessment
 
-Evaluate learner responses across multiple cognitive dimensions including:
+Evaluate:
 
 - Assumption Detection
-- Problem Framing
 - Constraint Awareness
+- Problem Framing
 - Reflection
-- First-Principles Thinking
+- Simplicity
 
 ## Learning Analytics
 
-Track learner improvement over time.
+Track learner growth over time.
 
 ## Cognitive Skills Curriculum
 
-Expand into a full curriculum covering:
+Expand beyond problem reframing into:
 
 - Systems Thinking
 - Tradeoff Analysis
@@ -257,12 +393,29 @@ Expand into a full curriculum covering:
 - Root Cause Analysis
 - Transfer of Learning
 
+## Product Experience
+
+Add:
+
+- Dashboard
+- Progress Tracking
+- Daily Challenges
+- Learning History
+- Achievement Badges
+
 ---
 
 # About This Project
 
-This project combines software engineering, AI engineering, product management, and learning science to explore one central question:
+This project combines:
+
+- Software Engineering
+- AI Engineering
+- Product Management
+- Learning Science
+
+to explore one central question:
 
 > **How can AI help people become better thinkers?**
 
-Rather than replacing human reasoning, the goal is to build AI that strengthens it.
+The long-term vision is an AI-powered cognitive coaching platform that helps learners build transferable thinking skills through guided reflection rather than answer generation.
