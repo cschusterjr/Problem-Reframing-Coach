@@ -1,20 +1,40 @@
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s: %(name)s: %(message)s",
+)
+
 from fastapi import FastAPI, HTTPException
 
+from app.coach import generate_coaching_questions, generate_feedback
 from app.models import (
     InitialResponse,
     CoachingResponse,
     RevisedResponse,
-    FeedbackResponse
+    FeedbackResponse,
 )
 from app.scenarios import load_scenarios, get_scenario_by_id
-from app.coach import generate_coaching_questions, generate_feedback
 
-app = FastAPI(title="Problem Reframing Coach")
+app = FastAPI(
+    title="Problem Reframing Coach",
+    description="API for the AI-powered Problem Reframing Coach.",
+    version="0.6.1",
+)
 
 
 @app.get("/")
 def root():
-    return {"message": "Problem Reframing Coach API is running."}
+    return {
+        "message": "Problem Reframing Coach API is running."
+    }
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok"
+    }
 
 
 @app.get("/scenarios")
@@ -27,7 +47,10 @@ def get_scenario(scenario_id: str):
     scenario = get_scenario_by_id(scenario_id)
 
     if not scenario:
-        raise HTTPException(status_code=404, detail="Scenario not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Scenario not found",
+        )
 
     return scenario
 
@@ -37,17 +60,20 @@ def coach_response(response: InitialResponse):
     scenario = get_scenario_by_id(response.scenario_id)
 
     if not scenario:
-        raise HTTPException(status_code=404, detail="Scenario not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Scenario not found",
+        )
 
     coaching_questions = generate_coaching_questions(
-        scenario,
-        response.user_response
+        scenario=scenario,
+        user_response=response.user_response,
     )
 
     return CoachingResponse(
         scenario_id=response.scenario_id,
         initial_response=response.user_response,
-        coaching_questions=coaching_questions
+        coaching_questions=coaching_questions,
     )
 
 
@@ -56,12 +82,15 @@ def feedback_response(response: RevisedResponse):
     scenario = get_scenario_by_id(response.scenario_id)
 
     if not scenario:
-        raise HTTPException(status_code=404, detail="Scenario not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Scenario not found",
+        )
 
     feedback = generate_feedback(
         scenario=scenario,
         initial_response=response.initial_response,
-        revised_response=response.revised_response
+        revised_response=response.revised_response,
     )
 
     return FeedbackResponse(**feedback)
