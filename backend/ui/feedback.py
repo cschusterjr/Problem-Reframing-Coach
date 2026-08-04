@@ -7,24 +7,66 @@ def render_revision_form(scenario, api_base_url, requests):
     revised_response = st.text_area(
         "Revise your answer after considering the coaching questions.",
         height=150,
-        placeholder="Write your revised solution here..."
+        placeholder="Write your revised solution here...",
     )
 
     if st.button("Get Feedback", type="primary"):
         if not revised_response.strip():
-            st.warning("Please write a revised answer before getting feedback.")
+            st.warning(
+                "Please write a revised answer before getting feedback."
+            )
             return
 
-        feedback_response = requests.post(
-            f"{api_base_url}/feedback",
-            json={
-                "scenario_id": scenario["id"],
-                "initial_response": st.session_state["initial_response"],
-                "revised_response": revised_response
-            }
-        )
+        try:
+            feedback_response = requests.post(
+                f"{api_base_url}/feedback",
+                json={
+                    "scenario_id": scenario["id"],
+                    "initial_response": st.session_state[
+                        "initial_response"
+                    ],
+                    "revised_response": revised_response,
+                },
+                timeout=60,
+            )
 
-        st.session_state["feedback"] = feedback_response.json()
+            feedback_response.raise_for_status()
+            feedback_data = feedback_response.json()
+
+        except requests.exceptions.ConnectionError:
+            st.error(
+                "The coaching service is unavailable. "
+                "Confirm that FastAPI is running, then try again."
+            )
+            return
+
+        except requests.exceptions.Timeout:
+            st.error(
+                "The assessment took too long to complete. "
+                "Please try again."
+            )
+            return
+
+        except requests.exceptions.HTTPError:
+            st.error(
+                "The coaching service could not generate feedback. "
+                f"Status code: {feedback_response.status_code}"
+            )
+            return
+
+        except requests.exceptions.JSONDecodeError:
+            st.error(
+                "The coaching service returned an invalid response."
+            )
+            return
+
+        except requests.exceptions.RequestException as error:
+            st.error(
+                f"Unable to retrieve feedback: {error}"
+            )
+            return
+
+        st.session_state["feedback"] = feedback_data
         st.session_state["step"] = "feedback"
         st.rerun()
 
@@ -35,7 +77,52 @@ def render_feedback_report():
     st.markdown("### Step 3 of 3: Cognitive Flexibility Report")
     st.progress(1.0)
 
-    st.metric("Reframing Score", f"{feedback['score']}/10")
+    overall_score = feedback.get("overall_rubric_score", 0)
+
+    st.metric(
+        "Overall Cognitive Score",
+        f"{overall_score:.1f}/5",
+    )
+
+    st.markdown("#### Cognitive Skill Breakdown")
+
+    rubric_dimensions = feedback.get(
+        "rubric_dimensions",
+        [],
+    )
+
+    if rubric_dimensions:
+        for dimension in rubric_dimensions:
+            score = dimension.get("score", 0)
+            name = dimension.get(
+                "name",
+                "Assessment Dimension",
+            )
+            dimension_feedback = dimension.get(
+                "feedback",
+                "",
+            )
+
+            filled_stars = "★" * score
+            empty_stars = "☆" * (5 - score)
+
+            st.markdown(
+                f"### {name}"
+            )
+            st.markdown(
+                f"**{filled_stars}{empty_stars}** "
+                f"({score}/5)"
+            )
+            st.write(dimension_feedback)
+            st.divider()
+
+    else:
+        st.warning(
+            "Detailed rubric results were not available."
+        )
+
+    st.markdown("#### Coaching Summary")
+    st.write(feedback["feedback"])
 
     st.markdown(
         f"""
@@ -64,17 +151,18 @@ def render_feedback_report():
             <p>{feedback["key_takeaway"]}</p>
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
-
-    st.markdown("#### Coaching Feedback")
-    st.write(feedback["feedback"])
 
     st.markdown("#### Reflection Prompt")
     st.write(feedback["reflection_prompt"])
 
     st.markdown("#### Where This Skill Applies")
-    for application in feedback.get("real_world_applications", []):
+
+    for application in feedback.get(
+        "real_world_applications",
+        [],
+    ):
         st.write(f"- {application}")
 
     if st.button("Try Another Challenge"):
