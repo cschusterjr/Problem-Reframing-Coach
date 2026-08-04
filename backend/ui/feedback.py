@@ -78,20 +78,42 @@ def render_feedback_report():
     st.progress(1.0)
 
     overall_score = feedback.get("overall_rubric_score", 0)
+    rubric_dimensions = feedback.get("rubric_dimensions", [])
 
     st.metric(
         "Overall Cognitive Score",
         f"{overall_score:.1f}/5",
     )
 
-    st.markdown("#### Cognitive Skill Breakdown")
-
-    rubric_dimensions = feedback.get(
-        "rubric_dimensions",
-        [],
-    )
-
     if rubric_dimensions:
+        strongest_dimension = max(
+            rubric_dimensions,
+            key=lambda dimension: dimension.get("score", 0),
+        )
+
+        growth_dimension = min(
+            rubric_dimensions,
+            key=lambda dimension: dimension.get("score", 0),
+        )
+
+        strength_column, growth_column = st.columns(2)
+
+        with strength_column:
+            st.success(
+                f"**Top Strength**\n\n"
+                f"{strongest_dimension['name']} "
+                f"({strongest_dimension['score']}/5)"
+            )
+
+        with growth_column:
+            st.warning(
+                f"**Next Growth Area**\n\n"
+                f"{growth_dimension['name']} "
+                f"({growth_dimension['score']}/5)"
+            )
+
+        st.markdown("#### Cognitive Skill Breakdown")
+
         for dimension in rubric_dimensions:
             score = dimension.get("score", 0)
             name = dimension.get(
@@ -106,13 +128,12 @@ def render_feedback_report():
             filled_stars = "★" * score
             empty_stars = "☆" * (5 - score)
 
-            st.markdown(
-                f"### {name}"
-            )
+            st.markdown(f"### {name}")
             st.markdown(
                 f"**{filled_stars}{empty_stars}** "
                 f"({score}/5)"
             )
+            st.progress(score / 5)
             st.write(dimension_feedback)
             st.divider()
 
