@@ -1,3 +1,4 @@
+from app.assessment.assessor import CognitiveAssessor
 from app.services.provider_factory import create_ai_provider
 
 
@@ -5,12 +6,13 @@ class CognitiveCoach:
     """
     Core coaching engine.
 
-    The coach owns the instructional logic.
-    The AI provider owns how coaching text is generated.
+    The coach owns the instructional and assessment logic.
+    The AI provider owns how coaching questions are generated.
     """
 
     def __init__(self, ai_provider=None):
         self.ai_provider = ai_provider or create_ai_provider()
+        self.assessor = CognitiveAssessor()
 
     def analyze_response(self, user_response: str) -> dict:
         return {
@@ -31,6 +33,13 @@ class CognitiveCoach:
         )
 
     def score_response(self, revised_response: str) -> int:
+        """
+        Legacy score retained temporarily for UI compatibility.
+
+        This will be removed after the Streamlit feedback screen is fully
+        migrated to the cognitive rubric.
+        """
+
         revised = revised_response.lower()
 
         keywords = [
@@ -58,7 +67,21 @@ class CognitiveCoach:
         initial_response: str,
         revised_response: str,
     ) -> dict:
-        score = self.score_response(revised_response)
+        rubric = self.assessor.assess(
+            initial_response=initial_response,
+            revised_response=revised_response,
+        )
+
+        legacy_score = self.score_response(revised_response)
+
+        rubric_dimensions = [
+            {
+                "name": dimension.name,
+                "score": dimension.score,
+                "feedback": dimension.feedback,
+            }
+            for dimension in rubric.dimensions
+        ]
 
         return {
             "scenario_id": scenario["id"],
@@ -68,11 +91,15 @@ class CognitiveCoach:
             "simple_solution": scenario["simple_solution"],
             "feedback": (
                 "Your revised response shows stronger problem reframing. "
-                "The key move is shifting away from the first obvious solution "
-                "and questioning whether the original frame was too narrow."
+                "The rubric below explains how your reasoning changed across "
+                "several cognitive dimensions."
             ),
-            "score": score,
+            "score": legacy_score,
+            "overall_rubric_score": rubric.overall_score,
+            "rubric_dimensions": rubric_dimensions,
             "key_takeaway": scenario["key_takeaway"],
             "reflection_prompt": scenario["reflection_prompt"],
-            "real_world_applications": scenario["real_world_applications"],
+            "real_world_applications": scenario[
+                "real_world_applications"
+            ],
         }
