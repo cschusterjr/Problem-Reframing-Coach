@@ -1,26 +1,33 @@
 import logging
+from datetime import datetime
+
+from fastapi import FastAPI, HTTPException
+
+from app.coach import generate_coaching_questions, generate_feedback
+from app.models import (
+    CoachingResponse,
+    FeedbackResponse,
+    InitialResponse,
+    RevisedResponse,
+)
+from app.scenarios import get_scenario_by_id, load_scenarios
+from app.storage.attempt import LearningAttempt
+from app.storage.sqlite_repository import SQLiteAttemptRepository
+
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(levelname)s: %(name)s: %(message)s",
 )
 
-from fastapi import FastAPI, HTTPException
-
-from app.coach import generate_coaching_questions, generate_feedback
-from app.models import (
-    InitialResponse,
-    CoachingResponse,
-    RevisedResponse,
-    FeedbackResponse,
-)
-from app.scenarios import load_scenarios, get_scenario_by_id
-
 app = FastAPI(
     title="Problem Reframing Coach",
     description="API for the AI-powered Problem Reframing Coach.",
-    version="0.6.1",
+    version="0.8.0",
 )
+
+# Repository used to persist completed learner attempts
+attempt_repository = SQLiteAttemptRepository()
 
 
 @app.get("/")
@@ -92,5 +99,17 @@ def feedback_response(response: RevisedResponse):
         initial_response=response.initial_response,
         revised_response=response.revised_response,
     )
+
+    attempt = LearningAttempt(
+        timestamp=datetime.now(),
+        scenario_id=response.scenario_id,
+        initial_response=response.initial_response,
+        revised_response=response.revised_response,
+        overall_score=feedback["overall_rubric_score"],
+        rubric=feedback["rubric_dimensions"],
+        key_takeaway=feedback["key_takeaway"],
+    )
+
+    attempt_repository.save_attempt(attempt)
 
     return FeedbackResponse(**feedback)
