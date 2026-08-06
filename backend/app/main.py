@@ -8,6 +8,7 @@ from app.models import (
     CoachingResponse,
     FeedbackResponse,
     InitialResponse,
+    LearningAttemptResponse,
     RevisedResponse,
 )
 from app.scenarios import get_scenario_by_id, load_scenarios
@@ -26,7 +27,6 @@ app = FastAPI(
     version="0.8.0",
 )
 
-# Repository used to persist completed learner attempts
 attempt_repository = SQLiteAttemptRepository()
 
 
@@ -49,6 +49,14 @@ def get_scenarios():
     return load_scenarios()
 
 
+@app.get(
+    "/attempts",
+    response_model=list[LearningAttemptResponse],
+)
+def get_attempts():
+    return attempt_repository.load_attempts()
+
+
 @app.get("/scenarios/{scenario_id}")
 def get_scenario(scenario_id: str):
     scenario = get_scenario_by_id(scenario_id)
@@ -62,9 +70,14 @@ def get_scenario(scenario_id: str):
     return scenario
 
 
-@app.post("/coach", response_model=CoachingResponse)
+@app.post(
+    "/coach",
+    response_model=CoachingResponse,
+)
 def coach_response(response: InitialResponse):
-    scenario = get_scenario_by_id(response.scenario_id)
+    scenario = get_scenario_by_id(
+        response.scenario_id
+    )
 
     if not scenario:
         raise HTTPException(
@@ -84,9 +97,14 @@ def coach_response(response: InitialResponse):
     )
 
 
-@app.post("/feedback", response_model=FeedbackResponse)
+@app.post(
+    "/feedback",
+    response_model=FeedbackResponse,
+)
 def feedback_response(response: RevisedResponse):
-    scenario = get_scenario_by_id(response.scenario_id)
+    scenario = get_scenario_by_id(
+        response.scenario_id
+    )
 
     if not scenario:
         raise HTTPException(
@@ -105,9 +123,15 @@ def feedback_response(response: RevisedResponse):
         scenario_id=response.scenario_id,
         initial_response=response.initial_response,
         revised_response=response.revised_response,
-        overall_score=feedback["overall_rubric_score"],
-        rubric=feedback["rubric_dimensions"],
-        key_takeaway=feedback["key_takeaway"],
+        overall_score=feedback[
+            "overall_rubric_score"
+        ],
+        rubric=feedback[
+            "rubric_dimensions"
+        ],
+        key_takeaway=feedback[
+            "key_takeaway"
+        ],
     )
 
     attempt_repository.save_attempt(attempt)

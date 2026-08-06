@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -32,13 +34,25 @@ class FeedbackResponse(BaseModel):
     simple_solution: str
     feedback: str
 
-    # Retained temporarily so the existing UI keeps working.
+    # Retained temporarily for backward compatibility.
     score: int
 
-    # New intelligent-assessment fields.
-    overall_rubric_score: float = Field(ge=1.0, le=5.0)
+    overall_rubric_score: float = Field(
+        ge=1.0,
+        le=5.0,
+    )
     rubric_dimensions: list[RubricDimensionResponse]
 
     key_takeaway: str
     reflection_prompt: str
     real_world_applications: list[str]
+
+
+class LearningAttemptResponse(BaseModel):
+    timestamp: datetime
+    scenario_id: str
+    initial_response: str
+    revised_response: str
+    overall_score: float
+    rubric: list[dict]
+    key_takeaway: str
