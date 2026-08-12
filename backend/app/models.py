@@ -34,13 +34,14 @@ class FeedbackResponse(BaseModel):
     simple_solution: str
     feedback: str
 
-    # Retained temporarily for backward compatibility.
+    # Legacy score retained temporarily for compatibility.
     score: int
 
     overall_rubric_score: float = Field(
         ge=1.0,
         le=5.0,
     )
+
     rubric_dimensions: list[RubricDimensionResponse]
 
     key_takeaway: str
@@ -56,3 +57,10 @@ class LearningAttemptResponse(BaseModel):
     overall_score: float
     rubric: list[dict]
     key_takeaway: str
+
+
+class LearningAnalyticsResponse(BaseModel):
+    challenges_completed: int
+    average_score: float
+    strongest_skill: str | None
+    growth_area: str | None

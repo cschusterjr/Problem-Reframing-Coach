@@ -3,11 +3,13 @@ from datetime import datetime
 
 from fastapi import FastAPI, HTTPException
 
+from app.analytics.service import LearningAnalyticsService
 from app.coach import generate_coaching_questions, generate_feedback
 from app.models import (
     CoachingResponse,
     FeedbackResponse,
     InitialResponse,
+    LearningAnalyticsResponse,
     LearningAttemptResponse,
     RevisedResponse,
 )
@@ -21,13 +23,16 @@ logging.basicConfig(
     format="%(levelname)s: %(name)s: %(message)s",
 )
 
+
 app = FastAPI(
     title="Problem Reframing Coach",
     description="API for the AI-powered Problem Reframing Coach.",
     version="0.8.0",
 )
 
+
 attempt_repository = SQLiteAttemptRepository()
+analytics_service = LearningAnalyticsService()
 
 
 @app.get("/")
@@ -57,9 +62,21 @@ def get_attempts():
     return attempt_repository.load_attempts()
 
 
+@app.get(
+    "/analytics/summary",
+    response_model=LearningAnalyticsResponse,
+)
+def get_analytics_summary():
+    attempts = attempt_repository.load_attempts()
+
+    return analytics_service.summarize(attempts)
+
+
 @app.get("/scenarios/{scenario_id}")
 def get_scenario(scenario_id: str):
-    scenario = get_scenario_by_id(scenario_id)
+    scenario = get_scenario_by_id(
+        scenario_id
+    )
 
     if not scenario:
         raise HTTPException(
@@ -134,6 +151,8 @@ def feedback_response(response: RevisedResponse):
         ],
     )
 
-    attempt_repository.save_attempt(attempt)
+    attempt_repository.save_attempt(
+        attempt
+    )
 
     return FeedbackResponse(**feedback)
