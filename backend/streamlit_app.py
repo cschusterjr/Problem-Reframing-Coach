@@ -7,6 +7,7 @@ from ui.coaching import (
     render_coaching_questions,
     render_initial_response_form,
 )
+from ui.dashboard import render_dashboard
 from ui.feedback import (
     render_feedback_report,
     render_revision_form,
@@ -96,20 +97,60 @@ st.set_page_config(
 
 apply_styles()
 
+
+# ---------------------------------------------------------
+# Navigation state
+# ---------------------------------------------------------
+
+if "navigation" not in st.session_state:
+    st.session_state["navigation"] = "Dashboard"
+
+if "requested_navigation" in st.session_state:
+    st.session_state["navigation"] = st.session_state.pop(
+        "requested_navigation"
+    )
+
+
+# ---------------------------------------------------------
+# Sidebar navigation
+# ---------------------------------------------------------
+
 page = st.sidebar.radio(
     "Navigation",
     [
+        "Dashboard",
         "Practice",
         "Learning History",
     ],
+    key="navigation",
 )
+
+
+# ---------------------------------------------------------
+# Dashboard
+# ---------------------------------------------------------
+
+if page == "Dashboard":
+    render_dashboard(API_BASE_URL)
+    st.stop()
+
+
+# ---------------------------------------------------------
+# Learning History
+# ---------------------------------------------------------
 
 if page == "Learning History":
     render_learning_history(API_BASE_URL)
     st.stop()
 
+
+# ---------------------------------------------------------
+# Practice
+# ---------------------------------------------------------
+
 if "step" not in st.session_state:
     st.session_state["step"] = "welcome"
+
 
 scenarios = load_scenarios(API_BASE_URL)
 
@@ -117,16 +158,21 @@ if not scenarios:
     st.info(
         "FastAPI can be started from the backend folder with:"
     )
+
     st.code(
         "python -m uvicorn app.main:app --reload --port 8001",
         language="powershell",
     )
+
     st.stop()
+
 
 if "selected_scenario" not in st.session_state:
     st.session_state["selected_scenario"] = scenarios[0]
 
+
 scenario = st.session_state["selected_scenario"]
+
 
 if st.session_state["step"] == "welcome":
     render_welcome()
@@ -139,14 +185,18 @@ if st.session_state["step"] == "welcome":
         "selected_scenario"
     ] = selected_scenario
 
+
 elif st.session_state["step"] == "challenge":
-    render_scenario_card(scenario)
+    render_scenario_card(
+        scenario
+    )
 
     render_initial_response_form(
         scenario,
         API_BASE_URL,
         requests,
     )
+
 
 elif st.session_state["step"] == "coaching":
     render_coaching_questions()
@@ -157,8 +207,10 @@ elif st.session_state["step"] == "coaching":
         requests,
     )
 
+
 elif st.session_state["step"] == "feedback":
     render_feedback_report()
+
 
 else:
     st.error(
