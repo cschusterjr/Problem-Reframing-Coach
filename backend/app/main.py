@@ -11,6 +11,7 @@ from app.models import (
     InitialResponse,
     LearningAnalyticsResponse,
     LearningAttemptResponse,
+    LearningTrendPointResponse,
     RevisedResponse,
 )
 from app.scenarios import get_scenario_by_id, load_scenarios
@@ -70,6 +71,16 @@ def get_analytics_summary():
     attempts = attempt_repository.load_attempts()
 
     return analytics_service.summarize(attempts)
+
+
+@app.get(
+    "/analytics/trend",
+    response_model=list[LearningTrendPointResponse],
+)
+def get_analytics_trend():
+    attempts = attempt_repository.load_attempts()
+
+    return analytics_service.score_trend(attempts)
 
 
 @app.get("/scenarios/{scenario_id}")

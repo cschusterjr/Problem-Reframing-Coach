@@ -64,3 +64,9 @@ class LearningAnalyticsResponse(BaseModel):
     average_score: float
     strongest_skill: str | None
     growth_area: str | None
+
+
+class LearningTrendPointResponse(BaseModel):
+    timestamp: datetime
+    scenario_id: str
+    overall_score: float

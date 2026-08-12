@@ -72,3 +72,25 @@ class LearningAnalyticsService:
             "strongest_skill": strongest_skill,
             "growth_area": growth_area,
         }
+
+    def score_trend(
+        self,
+        attempts: list[LearningAttempt],
+    ) -> list[dict]:
+        """
+        Return cognitive scores in chronological order.
+        """
+
+        ordered_attempts = sorted(
+            attempts,
+            key=lambda attempt: attempt.timestamp,
+        )
+
+        return [
+            {
+                "timestamp": attempt.timestamp,
+                "scenario_id": attempt.scenario_id,
+                "overall_score": attempt.overall_score,
+            }
+            for attempt in ordered_attempts
+        ]

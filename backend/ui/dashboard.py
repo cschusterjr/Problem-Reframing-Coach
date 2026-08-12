@@ -10,12 +10,19 @@ def render_dashboard(api_base_url: str):
     )
 
     try:
-        response = requests.get(
+        summary_response = requests.get(
             f"{api_base_url}/analytics/summary",
             timeout=10,
         )
-        response.raise_for_status()
-        analytics = response.json()
+        summary_response.raise_for_status()
+        analytics = summary_response.json()
+
+        trend_response = requests.get(
+            f"{api_base_url}/analytics/trend",
+            timeout=10,
+        )
+        trend_response.raise_for_status()
+        trend = trend_response.json()
 
     except requests.exceptions.ConnectionError:
         st.error(
@@ -91,6 +98,33 @@ def render_dashboard(api_base_url: str):
             st.info(
                 "Complete a challenge to identify your growth area."
             )
+
+    st.markdown("---")
+
+    st.markdown("### Cognitive Score Over Time")
+
+    if trend:
+        chart_data = {
+            "Cognitive Score": [
+                point["overall_score"]
+                for point in trend
+            ]
+        }
+
+        st.line_chart(
+            chart_data,
+            y="Cognitive Score",
+        )
+
+        if len(trend) == 1:
+            st.caption(
+                "Complete more challenges to build a progress trend."
+            )
+
+    else:
+        st.info(
+            "Complete a challenge to begin tracking your progress."
+        )
 
     st.markdown("---")
 
