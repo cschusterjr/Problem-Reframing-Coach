@@ -1,3 +1,4 @@
+from app.instruction.learner_context import LearnerContext
 from app.services.ai_provider import AIProvider
 
 
@@ -8,6 +9,7 @@ class MockAIProvider(AIProvider):
         self,
         scenario: dict,
         learner_response: str,
+        learner_context: LearnerContext | None = None,
     ) -> list[str]:
         cognitive_skill = scenario.get(
             "cognitive_skill",
