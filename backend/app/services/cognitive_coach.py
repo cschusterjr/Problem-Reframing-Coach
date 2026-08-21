@@ -1,5 +1,8 @@
 from app.assessment.assessor import CognitiveAssessor
+from app.instruction.learner_context import LearnerContext
+from app.instruction.learner_context_service import LearnerContextService
 from app.services.provider_factory import create_ai_provider
+from app.storage.attempt import LearningAttempt
 
 
 class CognitiveCoach:
@@ -10,15 +13,38 @@ class CognitiveCoach:
     The AI provider owns how coaching questions are generated.
     """
 
-    def __init__(self, ai_provider=None):
+    def __init__(
+        self,
+        ai_provider=None,
+        learner_context_service=None,
+    ):
         self.ai_provider = ai_provider or create_ai_provider()
         self.assessor = CognitiveAssessor()
+        self.learner_context_service = (
+            learner_context_service
+            or LearnerContextService()
+        )
 
     def analyze_response(self, user_response: str) -> dict:
         return {
             "response_length": len(user_response),
             "contains_solution": bool(user_response.strip()),
         }
+
+    def build_learner_context(
+        self,
+        attempts: list[LearningAttempt],
+    ) -> LearnerContext:
+        """
+        Build learner-level context from historical attempts.
+
+        The context is not yet passed to the AI provider.
+        It will be used in the next adaptive coaching module.
+        """
+
+        return self.learner_context_service.build(
+            attempts
+        )
 
     def generate_questions(
         self,
@@ -72,7 +98,9 @@ class CognitiveCoach:
             revised_response=revised_response,
         )
 
-        legacy_score = self.score_response(revised_response)
+        legacy_score = self.score_response(
+            revised_response
+        )
 
         rubric_dimensions = [
             {
